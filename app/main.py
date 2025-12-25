@@ -29,7 +29,7 @@ def cleanup_files(*paths):
         if path.startswith(TEMP_DIR) and os.path.exists(path):
             os.remove(path)
 
-@app.post("/convert")
+'''@app.post("/convert")
 async def convert_pdf(
     background_tasks: BackgroundTasks,
     pdf: UploadFile = File(...)
@@ -48,4 +48,19 @@ async def convert_pdf(
         media_type="audio/mpeg",
         filename="result.mp3",
         background=background_tasks
+    )'''
+@app.post("/convert")
+async def convert_pdf(pdf: UploadFile = File(...)):
+        temp_pdf = os.path.join(TEMP_DIR, f"{uuid.uuid4()}.pdf")
+        with open(temp_pdf, "wb") as f:
+            f.write(await pdf.read())
+
+        mp3_path = os.path.join(TEMP_DIR, f"{uuid.uuid4()}.mp3")
+        pdf_to_audio(temp_pdf, mp3_path)
+
+        return FileResponse(
+            mp3_path,
+            media_type="audio/mpeg",
+            filename="result.mp3"
     )
+
